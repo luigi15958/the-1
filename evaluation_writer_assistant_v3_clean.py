@@ -6,6 +6,19 @@ import openai
 import os
 
 st.set_page_config(page_title="כלי עזר לכתיבת הערכות – הדמוקרטי הוד השרון", layout="wide")
+st.set_page_config(page_title="כלי עזר להערכות", layout="wide")
+
+st.markdown(
+    """
+    <style>
+    body, .main, .block-container {
+        direction: rtl;
+        text-align: right;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
