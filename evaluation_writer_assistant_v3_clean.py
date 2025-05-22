@@ -6,8 +6,6 @@ import openai
 import os
 
 st.set_page_config(page_title="כלי עזר לכתיבת הערכות – הדמוקרטי הוד השרון", layout="wide")
-st.set_page_config(page_title="כלי עזר להערכות", layout="wide")
-
 st.markdown(
     """
     <style>
