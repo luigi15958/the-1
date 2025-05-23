@@ -100,7 +100,7 @@ if api_key:
                 evaluations.append("")
 
             written_eval = st.text_area("✍️ טיוטת ההערכה (ניסוח חופשי שלך)", key=f"written_{index}")
-    if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
+if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
         proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד.
 
 - בצע הגהה לשונית מלאה: תקן שגיאות כתיב, טעויות תחביר, פיסוק לא תקין, ומילים שאינן כתובות נכון.
