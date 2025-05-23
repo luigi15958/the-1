@@ -49,15 +49,13 @@ if api_key:
 
     st.header("שלב 2: מה למדנו?")
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
-    learning_paragraph = ""
+    upgraded_learning = raw_learning
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
         prompt = f"""ערוך את כל הנושאים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה.
 הנה הרשימה:
 {raw_learning}"""
-        learning_paragraph = query_gpt(prompt)
-        st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
-    else:
-        learning_paragraph = raw_learning
+        upgraded_learning = query_gpt(prompt)
+        st.text_area("פסקת סיכום מוצעת:", value=upgraded_learning, height=150)
 
     st.header("שלב 3: תובנות לפי קטגוריות")
 
@@ -120,16 +118,14 @@ if api_key:
                 proofed = query_gpt(proof_prompt)
                 st.text_area("🪄 גרסה לאחר הגהה:", value=proofed, height=160, key=f"proofed_{index}")
 
-            # שמירת התוצר הסופי
             if len(evaluations) <= index:
                 evaluations.append(proofed)
             else:
                 evaluations[index] = proofed
 
-        # הורדת קובץ אקסל
         if st.button("📥 הורד את קובץ ההערכות"):
             df_students.insert(0, "שם הקורס", course_name)
-            df_students.insert(1, "מה למדנו", learning_paragraph)
+            df_students.insert(1, "מה למדנו", upgraded_learning)
             df_students["טיוטת / גרסה אחרונה"] = evaluations
 
             buffer = BytesIO()
