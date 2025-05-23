@@ -51,7 +51,8 @@ if api_key:
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
     learning_paragraph = ""
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
-        prompt = f"ערוך את כל הנושאים וההיבטים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה. הנה הרשימה:\n{raw_learning}"
+        prompt = f"ערוך את כל הנושאים וההיבטים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה. הנה הרשימה:
+{raw_learning}"
         learning_paragraph = query_gpt(prompt)
         st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
     else:
@@ -100,8 +101,9 @@ if api_key:
                 evaluations.append("")
 
             written_eval = st.text_area("✍️ טיוטת ההערכה (ניסוח חופשי שלך)", key=f"written_{index}")
-if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
-        proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד.
+
+            if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
+                proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד.
 
 - בצע הגהה לשונית מלאה: תקן שגיאות כתיב, טעויות תחביר, פיסוק לא תקין, ומילים שאינן כתובות נכון.
 - שמור על הסגנון, הרוח והכוונה של המורה ככל האפשר.
@@ -115,10 +117,9 @@ if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
 
 הנה הטקסט:
 {written_eval}"""
-        proofed = query_gpt(proof_prompt)
-        st.text_area("🪄 גרסה לאחר הגהה:", value=proofed, height=160, key=f"proofed_{index}")
-        evaluations[index] = proofed
-      
+                proofed = query_gpt(proof_prompt)
+                st.text_area("🪄 גרסה לאחר הגהה:", value=proofed, height=160, key=f"proofed_{index}")
+                evaluations[index] = proofed
 
         if st.button("📥 הורד את קובץ ההערכות"):
             df_students.insert(0, "שם הקורס", course_name)
