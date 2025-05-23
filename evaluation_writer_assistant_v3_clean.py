@@ -51,8 +51,9 @@ if api_key:
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
     learning_paragraph = ""
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
-        prompt = f"ערוך את כל הנושאים וההיבטים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה. הנה הרשימה:
-{raw_learning}"
+        prompt = f"""ערוך את כל הנושאים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה.
+    הנה הרשימה:
+    {raw_learning}"""
         learning_paragraph = query_gpt(prompt)
         st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
     else:
