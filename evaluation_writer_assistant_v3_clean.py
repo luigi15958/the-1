@@ -52,8 +52,8 @@ if api_key:
     learning_paragraph = ""
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
         prompt = f"""ערוך את כל הנושאים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה.
-    הנה הרשימה:
-    {raw_learning}"""
+הנה הרשימה:
+{raw_learning}"""
         learning_paragraph = query_gpt(prompt)
         st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
     else:
@@ -88,6 +88,7 @@ if api_key:
 
             all_info = f"נוכחות: {q1}\nידע: {q2}\nמשימות: {q3}\nיחס ללמידה: {q4}\nחוזקות ואתגרים: {q5}\nטיפ אישי: {q6}"
 
+            insight_text = ""
             if st.button("📌 הפק תובנות השראתיות", key=f"insight_{index}"):
                 insight_prompt = f"""הנה מידע שכתב מורה על תלמיד במספר קטגוריות:
 נוכחות, ידע, התמודדות עם משימות, יחס ללמידה, חוזקות ואתגרים.
@@ -97,12 +98,10 @@ if api_key:
 {all_info}"""
                 insight_text = query_gpt(insight_prompt)
                 st.text_area("🔍 תובנות השראתיות:", value=insight_text, height=160, key=f"insight_text_{index}")
-                evaluations.append(insight_text)
-            else:
-                evaluations.append("")
 
             written_eval = st.text_area("✍️ טיוטת ההערכה (ניסוח חופשי שלך)", key=f"written_{index}")
 
+            proofed = written_eval
             if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
                 proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד.
 
@@ -120,8 +119,14 @@ if api_key:
 {written_eval}"""
                 proofed = query_gpt(proof_prompt)
                 st.text_area("🪄 גרסה לאחר הגהה:", value=proofed, height=160, key=f"proofed_{index}")
+
+            # שמירת התוצר הסופי
+            if len(evaluations) <= index:
+                evaluations.append(proofed)
+            else:
                 evaluations[index] = proofed
 
+        # הורדת קובץ אקסל
         if st.button("📥 הורד את קובץ ההערכות"):
             df_students.insert(0, "שם הקורס", course_name)
             df_students.insert(1, "מה למדנו", learning_paragraph)
