@@ -31,7 +31,7 @@ if api_key:
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "אתה מסייע למורים בכתיבה מקצועית, הגהה, ותיקון טקסטים בעברית תקנית."},
+                    {"role": "system", "content": "אתה מסייע למורים בעברית תקנית, מבצע הגהה וניסוחים מקצועיים תוך שמירה על סגנון אישי."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=temperature
@@ -48,7 +48,7 @@ if api_key:
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
     learning_paragraph = raw_learning
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
-        prompt = f"""ערוך את כל הנושאים ברשימה לפסקה אחת מנוסחת היטב שתסכם מה למדנו בקורס השנה, בשפה תקנית ונגישה:
+        prompt = f"""ערוך את כל הנושאים ברשימה לפסקה אחת מנוסחת היטב שתסכם מה למדנו בקורס השנה, בעברית תקנית ובהירה:
 {raw_learning}"""
         learning_paragraph = query_gpt(prompt)
     st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
@@ -76,27 +76,15 @@ if api_key:
             q6 = st.text_area("6️⃣ טיפ אישי / המלצה", key=f"q6_{i}")
 
             all_info = f"נוכחות: {q1}\nידע: {q2}\nמשימות: {q3}\nיחס ללמידה: {q4}\nחוזקות ואתגרים: {q5}\nטיפ אישי: {q6}"
-            insight_text = ""
-            if st.button("📌 הפק תובנות השראתיות", key=f"insight_btn_{i}"):
-                prompt = f"""הנה מידע שכתב מורה על תלמיד במספר קטגוריות:
-נוכחות, ידע, התמודדות עם משימות, יחס ללמידה, חוזקות ואתגרים.
-כתוב פסקת תובנות השראתית בגוף שני, מסכמת את עיקרי ההתבוננות – לא גנרית, אלא מותאמת. הימנע מקלישאות:
-{all_info}"""
-                insight_text = query_gpt(prompt)
-            insight_text = st.text_area("🔍 תובנות השראתיות", value=insight_text, key=f"insight_text_{i}")
+            insight_text = st.text_area("🔍 תובנות השראתיות", key=f"insight_text_{i}")
 
             written = st.text_area("✍️ טיוטת ההערכה", key=f"written_{i}")
             final_text = written
             if st.button("🧠 הגהה ובקרת איכות", key=f"proof_{i}"):
-                proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד. 
-בצע הגהה מקיפה: תקן שגיאות כתיב, תחביר, פיסוק, ושימוש שגוי במילים.
-אל תתקן ניסוחים תקינים. שמור על הסגנון הטבעי של המורה ככל האפשר.
-
-דוגמאות לשגיאות לתיקון:
-- "אוזר" → "עוזר"
-- "עשיתה" → "עשית"
-- "הגעתה" → "הגעת"
-- "היה לו קשההה" → "היה לו קשה"
+                proof_prompt = f"""בצע הגהה מלאה לטקסט הבא:
+- תקן שגיאות כתיב (למשל: 'אוזר' → 'עוזר')
+- תקן טעויות דקדוק ותחביר
+- שמור על הסגנון המקורי
 
 הטקסט:
 {written}"""
@@ -124,7 +112,7 @@ if api_key:
         st.download_button(
             label="📄 הורד את הקובץ",
             data=buffer.getvalue(),
-            file_name="הערכות_מסכם_מתוקן.xlsx",
+            file_name="קובץ_הערכות_מתוקן.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 else:
