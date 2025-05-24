@@ -34,7 +34,7 @@ if api_key:
             response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[
-                    {"role": "system", "content": "אתה מסייע למורים לבצע הגהה וניסוח של טקסטים מקצועיים בעברית תקנית תוך שמירה על הסגנון המקורי."},
+                    {"role": "system", "content": "אתה מסייע למורים לנסח טקסטים חינוכיים בעברית תקנית תוך שמירה על קול אישי."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=temperature
@@ -49,94 +49,78 @@ if api_key:
 
     st.header("שלב 2: מה למדנו?")
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
-    upgraded_learning = raw_learning
+    learning_paragraph = raw_learning
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
         prompt = f"""ערוך את כל הנושאים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה.
 הנה הרשימה:
 {raw_learning}"""
-        upgraded_learning = query_gpt(prompt)
-        st.text_area("פסקת סיכום מוצעת:", value=upgraded_learning, height=150)
+        learning_paragraph = query_gpt(prompt)
+    st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
 
-    st.header("שלב 3: תובנות לפי קטגוריות")
-
+    st.header("שלב 3: רשימת תלמידים")
     names_input = st.text_area("הדבק כאן את שמות התלמידים (שם פרטי ואז שם משפחה, כל תלמיד בשורה נפרדת):")
-    students = []
+
+    records = []
     if names_input.strip():
         lines = names_input.strip().split("\n")
-        for line in lines:
+        for i, line in enumerate(lines):
             parts = line.strip().split()
-            if len(parts) >= 2:
-                first_name = " ".join(parts[:-1])
-                last_name = parts[-1]
-                students.append({"שם פרטי": first_name, "שם משפחה": last_name})
-
-    evaluations = []
-    if students:
-        df_students = pd.DataFrame(students)
-        for index, row in df_students.iterrows():
-            full_name = f"{row['שם פרטי']} {row['שם משפחה']}"
+            if len(parts) < 2:
+                continue
+            first_name = " ".join(parts[:-1])
+            last_name = parts[-1]
+            full_name = f"{first_name} {last_name}"
             st.subheader(f"תלמיד.ה: {full_name}")
 
-            q1 = st.text_area("1️⃣ נוכחות / מעורבות", key=f"q1_{index}")
-            q2 = st.text_area("2️⃣ רמת ידע והבנה", key=f"q2_{index}")
-            q3 = st.text_area("3️⃣ התמודדות עם משימות", key=f"q3_{index}")
-            q4 = st.text_area("4️⃣ יחס ללמידה", key=f"q4_{index}")
-            q5 = st.text_area("5️⃣ חוזקות ואתגרים", key=f"q5_{index}")
-            q6 = st.text_area("6️⃣ טיפ אישי / המלצה", key=f"q6_{index}")
+            q1 = st.text_area("1️⃣ נוכחות / מעורבות", key=f"q1_{i}")
+            q2 = st.text_area("2️⃣ רמת ידע והבנה", key=f"q2_{i}")
+            q3 = st.text_area("3️⃣ התמודדות עם משימות", key=f"q3_{i}")
+            q4 = st.text_area("4️⃣ יחס ללמידה", key=f"q4_{i}")
+            q5 = st.text_area("5️⃣ חוזקות ואתגרים", key=f"q5_{i}")
+            q6 = st.text_area("6️⃣ טיפ אישי / המלצה", key=f"q6_{i}")
 
             all_info = f"נוכחות: {q1}\nידע: {q2}\nמשימות: {q3}\nיחס ללמידה: {q4}\nחוזקות ואתגרים: {q5}\nטיפ אישי: {q6}"
-
             insight_text = ""
-            if st.button("📌 הפק תובנות השראתיות", key=f"insight_{index}"):
-                insight_prompt = f"""הנה מידע שכתב מורה על תלמיד במספר קטגוריות:
+            if st.button("📌 הפק תובנות השראתיות", key=f"insight_btn_{i}"):
+                prompt = f"""הנה מידע שכתב מורה על תלמיד במספר קטגוריות:
 נוכחות, ידע, התמודדות עם משימות, יחס ללמידה, חוזקות ואתגרים.
-כתוב פסקת תובנות כללית ומקצועית בגוף שני, שמסכמת את העיקר –
-אך תשמור על ניסוח פתוח ולא מחייב, כזה שיכול לשמש השראה למורה שיכתוב את ההערכה הסופית.
-השתמש בשפה תקנית, רהוטה ומכבדת, והימנע מקלישאות.
+כתוב פסקת תובנות כללית ומקצועית בגוף שני שתוכל לשמש השראה לכתיבת הערכה.
 {all_info}"""
-                insight_text = query_gpt(insight_prompt)
-                st.text_area("🔍 תובנות השראתיות:", value=insight_text, height=160, key=f"insight_text_{index}")
+                insight_text = query_gpt(prompt)
+            insight_text = st.text_area("🔍 תובנות השראתיות", value=insight_text, key=f"insight_text_{i}")
 
-            written_eval = st.text_area("✍️ טיוטת ההערכה (ניסוח חופשי שלך)", key=f"written_{index}")
+            written = st.text_area("✍️ טיוטת ההערכה", key=f"written_{i}")
+            final_text = written
+            if st.button("🧠 הגהה ובקרת איכות", key=f"proof_{i}"):
+                prompt = f"""בצע הגהה לשונית וניסוחית לטקסט הבא:
+{written}
+שמירה על סגנון אישי, תיקון תחביר, שגיאות כתיב ופיסוק בלבד."""
+                final_text = query_gpt(prompt)
+            final_text = st.text_area("🪄 גרסה לאחר הגהה", value=final_text, key=f"final_{i}")
 
-            proofed = written_eval
-            if st.button("🧠 הגהה ובקרת איכות", key=f"proofread_{index}"):
-                proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד.
+            records.append({
+                "שם פרטי": first_name,
+                "שם משפחה": last_name,
+                "תובנות השראה": insight_text,
+                "טיוטה": written,
+                "גרסה לאחר הגהה": final_text
+            })
 
-- בצע הגהה לשונית מלאה: תקן שגיאות כתיב, טעויות תחביר, פיסוק לא תקין, ומילים שאינן כתובות נכון.
-- שמור על הסגנון, הרוח והכוונה של המורה ככל האפשר.
-- כתוב בעברית תקנית, בגוף שני, בשפה חינוכית ואישית המתאימה לבית ספר דמוקרטי.
-- חשוב במיוחד לתקן מילים שנכתבו עם שגיאת כתיב אך נראות דומות למילה אמיתית.
+    if records and st.button("📥 הורד את קובץ ההערכות"):
+        df = pd.DataFrame(records)
+        df.insert(0, "שם המורה", teacher_name)
+        df.insert(0, "שם הקורס", course_name)
+        df.insert(2, "מה למדנו", learning_paragraph)
 
-דוגמאות:
-- "אוזר" → "עוזר"
-- "הגעתה" → "הגעת"
-- "עשיתה" → "עשית"
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            df.to_excel(writer, index=False)
 
-הנה הטקסט:
-{written_eval}"""
-                proofed = query_gpt(proof_prompt)
-                st.text_area("🪄 גרסה לאחר הגהה:", value=proofed, height=160, key=f"proofed_{index}")
-
-            if len(evaluations) <= index:
-                evaluations.append(proofed)
-            else:
-                evaluations[index] = proofed
-
-        if st.button("📥 הורד את קובץ ההערכות"):
-            df_students.insert(0, "שם הקורס", course_name)
-            df_students.insert(1, "מה למדנו", upgraded_learning)
-            df_students["טיוטת / גרסה אחרונה"] = evaluations
-
-            buffer = BytesIO()
-            with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
-                df_students.to_excel(writer, index=False)
-
-            st.download_button(
-                label="📄 הורד את הקובץ",
-                data=buffer.getvalue(),
-                file_name="הערכות_סופשנה_השראה_והגהה.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        st.download_button(
+            label="📄 הורד את הקובץ",
+            data=buffer.getvalue(),
+            file_name="קובץ_הערכות_מסכם.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 else:
     st.warning("🔒 אין גישה למפתח API. ודא שהוא הוגדר כ-OPENAI_API_KEY במשתני הסביבה.")
