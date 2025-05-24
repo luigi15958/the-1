@@ -6,17 +6,14 @@ import openai
 import os
 
 st.set_page_config(page_title="כלי עזר לכתיבת הערכות – הדמוקרטי הוד השרון", layout="wide")
-st.markdown(
-    """
+st.markdown("""
     <style>
     body, .main, .block-container {
         direction: rtl;
         text-align: right;
     }
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 col1, col2, col3 = st.columns([1, 2, 1])
 with col2:
@@ -29,12 +26,12 @@ api_key = os.environ.get("OPENAI_API_KEY")
 if api_key:
     client = openai.OpenAI(api_key=api_key)
 
-    def query_gpt(prompt, temperature=0.7):
+    def query_gpt(prompt, temperature=0.3):
         try:
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "אתה מסייע למורים לנסח טקסטים חינוכיים בעברית תקנית תוך שמירה על קול אישי."},
+                    {"role": "system", "content": "אתה מסייע למורים בכתיבה מקצועית, הגהה, ותיקון טקסטים בעברית תקנית."},
                     {"role": "user", "content": prompt}
                 ],
                 temperature=temperature
@@ -51,8 +48,7 @@ if api_key:
     raw_learning = st.text_area("רשימת נושאים ותכנים שנלמדו בקורס:")
     learning_paragraph = raw_learning
     if st.button("✨ שדרג את הניסוח של 'מה למדנו'"):
-        prompt = f"""ערוך את כל הנושאים ברשימה לפסקה מנוסחת היטב שתסכם מה למדנו בקורס השנה.
-הנה הרשימה:
+        prompt = f"""ערוך את כל הנושאים ברשימה לפסקה אחת מנוסחת היטב שתסכם מה למדנו בקורס השנה, בשפה תקנית ונגישה:
 {raw_learning}"""
         learning_paragraph = query_gpt(prompt)
     st.text_area("פסקת סיכום מוצעת:", value=learning_paragraph, height=150)
@@ -84,7 +80,7 @@ if api_key:
             if st.button("📌 הפק תובנות השראתיות", key=f"insight_btn_{i}"):
                 prompt = f"""הנה מידע שכתב מורה על תלמיד במספר קטגוריות:
 נוכחות, ידע, התמודדות עם משימות, יחס ללמידה, חוזקות ואתגרים.
-כתוב פסקת תובנות כללית ומקצועית בגוף שני שתוכל לשמש השראה לכתיבת הערכה.
+כתוב פסקת תובנות השראתית בגוף שני, מסכמת את עיקרי ההתבוננות – לא גנרית, אלא מותאמת. הימנע מקלישאות:
 {all_info}"""
                 insight_text = query_gpt(prompt)
             insight_text = st.text_area("🔍 תובנות השראתיות", value=insight_text, key=f"insight_text_{i}")
@@ -92,15 +88,25 @@ if api_key:
             written = st.text_area("✍️ טיוטת ההערכה", key=f"written_{i}")
             final_text = written
             if st.button("🧠 הגהה ובקרת איכות", key=f"proof_{i}"):
-                prompt = f"""בצע הגהה לשונית וניסוחית לטקסט הבא:
-{written}
-שמירה על סגנון אישי, תיקון תחביר, שגיאות כתיב ופיסוק בלבד."""
-                final_text = query_gpt(prompt)
-            final_text = st.text_area("🪄 גרסה לאחר הגהה", value=final_text, key=f"final_{i}")
+                proof_prompt = f"""הטקסט הבא הוא טיוטה חופשית שכתב מורה כהערכה לתלמיד. 
+בצע הגהה מקיפה: תקן שגיאות כתיב, תחביר, פיסוק, ושימוש שגוי במילים.
+אל תתקן ניסוחים תקינים. שמור על הסגנון הטבעי של המורה ככל האפשר.
+
+דוגמאות לשגיאות לתיקון:
+- "אוזר" → "עוזר"
+- "עשיתה" → "עשית"
+- "הגעתה" → "הגעת"
+- "היה לו קשההה" → "היה לו קשה"
+
+הטקסט:
+{written}"""
+                final_text = query_gpt(proof_prompt)
+            final_text = st.text_area("🪄 גרסה לאחר הגהה", value=final_text, key=f"final_text_{i}")
 
             records.append({
                 "שם פרטי": first_name,
                 "שם משפחה": last_name,
+                "מה למדנו": learning_paragraph,
                 "תובנות השראה": insight_text,
                 "טיוטה": written,
                 "גרסה לאחר הגהה": final_text
@@ -110,7 +116,6 @@ if api_key:
         df = pd.DataFrame(records)
         df.insert(0, "שם המורה", teacher_name)
         df.insert(0, "שם הקורס", course_name)
-        df.insert(2, "מה למדנו", learning_paragraph)
 
         buffer = BytesIO()
         with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
@@ -119,7 +124,7 @@ if api_key:
         st.download_button(
             label="📄 הורד את הקובץ",
             data=buffer.getvalue(),
-            file_name="קובץ_הערכות_מסכם.xlsx",
+            file_name="הערכות_מסכם_מתוקן.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 else:
